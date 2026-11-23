@@ -130,7 +130,13 @@
     while (pit.children.length) pit.remove(pit.children[0]);
     var P = PITS[i]; P.build(); pitScale = P.scale;
     fireG.scale.setScalar(P.scale); fireG.position.set(PX, P.floor - YB * P.scale, 0); pit.position.x = PX;
-    cam.position.set(0, P.cam[0] + 3.1, P.cam[1] * 1.3); cam.lookAt(0, P.cam[2] + .75, 0);
+    setView(viewIdx);
+  }
+  // 보는 각도: 불을 중심으로 카메라 높이만 바꾼다 (거리는 그대로)
+  var VIEWS = [.17, .28, .5, .78], viewIdx = 1;
+  function setView(v) {
+    viewIdx = Math.max(0, Math.min(VIEWS.length - 1, v | 0)); var P = PITS[pitIdx < 0 ? 0 : pitIdx], ty = P.cam[2] + .75, dy = P.cam[0] + 3.1 - ty, dz = P.cam[1] * 1.3, r = Math.sqrt(dy * dy + dz * dz), e = VIEWS[viewIdx];
+    ty -= (e - .28) * 1.1; cam.position.set(0, ty + r * Math.sin(e), r * Math.cos(e)); cam.lookAt(0, ty, 0);
   }
 
   fireG.add(fireLight);
@@ -317,7 +323,7 @@
   function noiseHit(dur, vol, lp) { if (!AC || !cfg.sound) return; var sr = AC.sampleRate, b = AC.createBuffer(1, Math.floor(sr * dur), sr), d = b.getChannelData(0), l = 0; for (var i = 0; i < d.length; i++) { var w = Math.random() * 2 - 1, e = Math.sin(Math.PI * i / d.length); l += (w - l) * lp; d[i] = l * e; } var s = AC.createBufferSource(), g = AC.createGain(); s.buffer = b; g.gain.value = vol; s.connect(g); g.connect(AC.destination); s.start(); }
   function whoosh(v) { noiseHit(.7, .5 * v, .08); }
   function chopSnd(n) { noiseHit(.09, .6, .5); thud(); if (n === 2) noiseHit(.25, .35, .25); }
-  function applyCfg(s) { cfg = s || cfg; if (cfg.sound) audio(); setPit(cfg.pit || 0); }
+  function applyCfg(s) { cfg = s || cfg; if (cfg.sound) audio(); setPit(cfg.pit || 0); setView(cfg.view === undefined ? 1 : cfg.view); }
   W.onSettings(applyCfg); W.onWood(addWood); W.settings().then(applyCfg);
 
   // ---- 마우스: 장작 끌어 넣기 · 불 클릭(부채질/점화) · 통나무 클릭(장작 패기) · 빈 곳 끌기(창 이동)

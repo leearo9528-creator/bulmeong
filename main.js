@@ -5,7 +5,7 @@ const path = require('path');
 
 const SIZES = [[420, 310], [580, 430], [780, 580]];
 let win = null, tray = null;
-let cfg = { size: 1, pit: 0, sound: false, top: true, through: false, autostart: false, x: null, y: null };
+let cfg = { size: 1, pit: 0, view: 1, sound: false, top: true, through: false, autostart: false, x: null, y: null };
 const PIT_NAMES = ['접이식 육각 스테인리스', '타공 박스형', '팔각 타공형', '창 달린 박스형', '지붕 달린 정원 난로형'];
 const cfgPath = () => path.join(app.getPath('userData'), 'settings.json');
 function loadCfg() { try { Object.assign(cfg, JSON.parse(fs.readFileSync(cfgPath(), 'utf8'))); } catch (e) {} }
@@ -44,6 +44,7 @@ function buildMenu() {
     { label: '장작 넣기', click: () => win.webContents.send('wood') },
     { type: 'separator' },
     { label: '화로대 모양', submenu: PIT_NAMES.map((l, i) => ({ label: l, type: 'radio', checked: cfg.pit === i, click: set('pit', i) })) },
+    { label: '보는 각도', submenu: ['낮게', '보통', '조금 위에서', '위에서'].map((l, i) => ({ label: l, type: 'radio', checked: cfg.view === i, click: set('view', i) })) },
     { label: '크기', submenu: ['작게', '보통', '크게'].map((l, i) => ({ label: l, type: 'radio', checked: cfg.size === i, click: set('size', i) })) },
     { label: '장작 타는 소리', type: 'checkbox', checked: cfg.sound, click: set('sound', !cfg.sound) },
     { label: '항상 위에 두기', type: 'checkbox', checked: cfg.top, click: set('top', !cfg.top) },
@@ -83,6 +84,6 @@ ipcMain.on('shot', async (e, file) => { const img = await win.webContents.captur
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.whenReady().then(() => { loadCfg(); const pa = process.argv.find(a => a.startsWith('--pit=')); if (pa) cfg.pit = +pa.slice(6); createWindow(); });
+  app.whenReady().then(() => { loadCfg(); const pa = process.argv.find(a => a.startsWith('--pit=')); if (pa) cfg.pit = +pa.slice(6); const va = process.argv.find(a => a.startsWith('--view=')); if (va) cfg.view = +va.slice(7); createWindow(); });
   app.on('window-all-closed', () => app.quit());
 }
