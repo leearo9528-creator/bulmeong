@@ -1,6 +1,6 @@
 # 불멍 위젯
 
-**[Bulmeong.exe 내려받기](https://github.com/leearo9528-creator/bulmeong/releases/latest/download/Bulmeong.exe)** (윈도우, 설치 없이 실행)
+**[Bulmeong.exe 내려받기](https://github.com/leearo9528-creator/bulmeong/raw/release/Bulmeong.exe)** (윈도우, 설치 없이 실행)
 
 처음 실행할 때 윈도우 경고가 뜨면 "추가 정보 → 실행"을 누른다.
 
