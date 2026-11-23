@@ -24,8 +24,14 @@ function applyBounds(reset) {
   cfg.x = p.x; cfg.y = p.y;
   win.setBounds({ x: p.x, y: p.y, width: w, height: h });
 }
+// 항상 위: 윈도우에서는 다른 창이나 작업표시줄을 누르면 순서가 밀리는 일이 있어서, 가장 높은 단계로 올리고 주기적으로 다시 올린다.
+function keepOnTop() {
+  if (!win || win.isDestroyed()) return;
+  if (cfg.top) { win.setAlwaysOnTop(true, 'screen-saver', 1); win.moveTop(); }
+  else win.setAlwaysOnTop(false);
+}
 function applyAll() {
-  win.setAlwaysOnTop(cfg.top, 'floating');
+  keepOnTop();
   win.setIgnoreMouseEvents(cfg.through, { forward: true });
   app.setLoginItemSettings({ openAtLogin: cfg.autostart, path: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath });
   win.webContents.send('settings', cfg);
@@ -59,6 +65,8 @@ function createWindow() {
   if (process.argv.some(a => a.startsWith('--shot='))) win.webContents.on('console-message', (e, lvl, msg) => console.log('[page]', msg));
   win.loadFile('index.html');
   win.once('ready-to-show', () => { win.showInactive(); applyAll(); });
+  win.on('blur', keepOnTop); win.on('show', keepOnTop); win.on('always-on-top-changed', (e, on) => { if (cfg.top && !on) keepOnTop(); });
+  setInterval(keepOnTop, 2500);
   try {
     tray = new Tray(nativeImage.createFromPath(path.join(__dirname, 'build', 'tray.png')));
     tray.setToolTip('불멍 위젯');
